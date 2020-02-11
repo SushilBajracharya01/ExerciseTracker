@@ -7,9 +7,9 @@ const cors = require('cors');   //Express middleware that enables cors, Cross-or
 const mongoose = require('mongoose');   //Mongoose is an Object Data Modeling (ODM) library.
                                         //mongoose helps us to connect to mongoDB, manage relationships between
                                         //data, provides schema validation, and is used to translate between objects
-                                        //in code and the representation of those objects in MongooDb.
+                                        //in code and the representation of those objects in MongoDb.
 
-
+const path = require('path');
 
 
 require('dotenv').config(); 
@@ -25,7 +25,24 @@ mongoose.connect(uri, {useNewUrlParser: true, useCreateIndex: true, useUnifiedTo
 const connection = mongoose.connection;
 connection.once('open', ()=> {
     console.log("MongoDB database connection established successfully!");
-})
+});
+
+
+const exercisesRouter = require('./routes/exercises');
+const usersRouter = require('./routes/users');
+
+app.use('/exercises', exercisesRouter);
+app.use('/users', usersRouter);
+
+// Serve static assets if in production
+if (process.env.NODE_ENV === 'production') {
+    // Set static folder
+    app.use(express.static('../build'));
+
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, '../', 'build', 'index.html'));
+    })
+}
 
 app.listen(port, () => {
     console.log(`listening at port: ${port}`)
